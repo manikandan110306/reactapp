@@ -7,6 +7,8 @@ import QuestionForm from './components/QuestionForm';
 import TakeQuiz from './components/TakeQuiz';
 import QuizResults from './components/QuizResults';
 import AttendQuiz from './components/AttendQuiz';
+import PrivateRoute from './components/PrivateRoute';
+import QuizListPage from './components/QuizListPage';
 import { getQuizzes } from './utils/api';
 import Login from './components/Login';
 import Signup from './components/Signup';
@@ -41,39 +43,21 @@ function AppContent({ quizzes }) {
   const hideNavbar = ["/", "/signup"].includes(location.pathname);
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%)',
-      }}
-    >
-      <div
-        style={{
-          background: '#fff',
-          borderRadius: '16px',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
-          padding: '2rem',
-          minWidth: '350px',
-          maxWidth: '500px',
-          width: '100%',
-          textAlign: 'center',
-        }}
-      >
+    <div className="gradient-bg">
+      <div className="page-card">
         {/* ✅ Navbar only visible after login */}
         {!hideNavbar && <Navbar />}
 
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/create-quiz" element={<QuizForm />} />
-          <Route path="/add-question" element={<QuestionForm quizzes={quizzes} />} />
-          <Route path="/take-quiz" element={<TakeQuiz quizzes={quizzes} />} />
-          <Route path="/take-quiz/:quizId" element={<AttendQuiz />} />
-          <Route path="/results/:quizId" element={<QuizResults />} />
+          <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
+          <Route path="/create-quiz" element={<PrivateRoute><QuizForm /></PrivateRoute>} />
+          <Route path="/add-question" element={<PrivateRoute><QuestionForm quizzes={quizzes} /></PrivateRoute>} />
+          <Route path="/take-quiz" element={<PrivateRoute><TakeQuiz quizzes={quizzes} /></PrivateRoute>} />
+          <Route path="/take-quiz/:quizId" element={<PrivateRoute><AttendQuiz /></PrivateRoute>} />
+          <Route path="/results/:quizId" element={<PrivateRoute><QuizResults /></PrivateRoute>} />
+          <Route path="/quizzes" element={<PrivateRoute><QuizListPage /></PrivateRoute>} />
         </Routes>
       </div>
     </div>

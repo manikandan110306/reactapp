@@ -1,4 +1,3 @@
-// src/components/AttendQuiz.js
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -11,10 +10,8 @@ export default function AttendQuiz() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  // Get logged-in user from localStorage
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // Fetch quiz questions
   useEffect(() => {
     if (!quizId) return;
 
@@ -31,17 +28,14 @@ export default function AttendQuiz() {
       });
   }, [quizId]);
 
-  // Handle selecting an option
   const handleOptionChange = (questionId, optionId) => {
     setAnswers({ ...answers, [questionId]: optionId });
   };
 
-  // Check if all questions are answered
   const allAnswered =
     questions.length > 0 &&
     questions.every((q) => answers[q.id] !== undefined);
 
-  // Handle quiz submission
   const handleSubmit = async () => {
     if (!user) {
       alert("Please log in first!");
@@ -68,8 +62,7 @@ export default function AttendQuiz() {
         "http://localhost:8080/api/quiz-attempts",
         payload
       );
-      alert("Quiz submitted successfully!"); // ✅ Alert success
-      // Redirect to result page for this quiz
+      alert("Quiz submitted successfully!");
       navigate(`/results/${quizId}`);
     } catch (err) {
       console.error("Failed to submit quiz:", err.response || err);

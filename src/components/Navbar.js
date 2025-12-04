@@ -1,8 +1,11 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { getCurrentUser } from '../auth';
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const user = getCurrentUser();
   
   const navStyle = {
     display: 'flex',
@@ -32,38 +35,23 @@ const Navbar = () => {
     background: '#2193b0'
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    navigate('/');
+  };
+
   return (
     <nav className="navbar-top" style={navStyle}>
-      <Link 
-        to="/home" 
-        style={location.pathname === '/home' ? activeLinkStyle : linkStyle}
-      >
-        Home
-      </Link>
-      <Link 
-        to="/create-quiz" 
-        style={location.pathname === '/create' ? activeLinkStyle : linkStyle}
-      >
-        Create Quiz
-      </Link>
-      <Link 
-        to="/add-question" 
-        style={location.pathname === '/add' ? activeLinkStyle : linkStyle}
-      >
-        Add Question
-      </Link>
-      <Link 
-        to="/take-quiz" 
-        style={location.pathname === '/take' ? activeLinkStyle : linkStyle}
-      >
-        Take Quiz
-      </Link>
-      <Link 
-        to="/" 
-        style={location.pathname === '/' ? activeLinkStyle : linkStyle}
-      >
-        Logout
-      </Link>
+      {user && (
+        <>
+          <Link to="/home" style={location.pathname === '/home' ? activeLinkStyle : linkStyle}>Home</Link>
+          <Link to="/create-quiz" style={location.pathname === '/create-quiz' ? activeLinkStyle : linkStyle}>Create Quiz</Link>
+          <Link to="/add-question" style={location.pathname === '/add-question' ? activeLinkStyle : linkStyle}>Add Question</Link>
+          <Link to="/take-quiz" style={location.pathname === '/take-quiz' ? activeLinkStyle : linkStyle}>Take Quiz</Link>
+          <Link to="/quizzes" style={location.pathname === '/quizzes' ? activeLinkStyle : linkStyle}>All Quizzes</Link>
+          <button onClick={handleLogout} style={{ ...linkStyle, background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer' }}>Logout</button>
+        </>
+      )}
     </nav>
   );
 };

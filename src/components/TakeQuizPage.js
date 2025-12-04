@@ -9,9 +9,9 @@ export default function TakeQuizPage() {
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState(null);
 
-  // Fetch all quizzes
+  // Fetch all quizzes (use /get which returns a list)
   useEffect(() => {
-    axios.get("http://localhost:8080/api/quizzes")
+    axios.get("http://localhost:8080/api/quizzes/get")
       .then(res => setQuizzes(res.data))
       .catch(err => console.error(err));
   }, []);
@@ -19,27 +19,27 @@ export default function TakeQuizPage() {
   // Fetch questions when quiz is selected
   useEffect(() => {
     if (quizId) {
-      axios.get(`http://localhost:8080/api/quizzes/${quizId}/questions`)
+      axios.get(`http://localhost:8080/api/quizzes/${quizId}/questions/get`)
         .then(res => setQuestions(res.data))
         .catch(err => console.error(err));
     }
   }, [quizId]);
 
-  const handleOptionChange = (questionId, option) => {
-    setAnswers({ ...answers, [questionId]: option });
+  const handleOptionChange = (questionId, optionId) => {
+    setAnswers({ ...answers, [questionId]: optionId });
   };
 
   const handleSubmit = () => {
     const payload = {
       quizId: parseInt(quizId),
       studentName: "John Doe", // replace with logged-in user if available
-      answers: Object.entries(answers).map(([qId, selectedOption]) => ({
+      answers: Object.entries(answers).map(([qId, selectedOptionId]) => ({
         questionId: parseInt(qId),
-        selectedOption
+        selectedOptionId: parseInt(selectedOptionId)
       }))
     };
 
-    axios.post("http://localhost:8080/api/quizAttempts", payload)
+    axios.post("http://localhost:8080/api/quiz-attempts", payload)
       .then(res => {
         setResult(res.data);
         setSubmitted(true);
@@ -73,16 +73,16 @@ export default function TakeQuizPage() {
             <div key={q.id} className="p-4 mb-4 border rounded shadow">
               <p className="font-semibold">{index + 1}. {q.questionText}</p>
               <div className="mt-2">
-                {q.options.map((opt, i) => (
-                  <label key={i} className="block">
+                {q.options && q.options.map((opt) => (
+                  <label key={opt.id} className="block">
                     <input
                       type="radio"
                       name={`question-${q.id}`}
-                      value={opt}
-                      checked={answers[q.id] === opt}
-                      onChange={() => handleOptionChange(q.id, opt)}
+                      value={opt.id}
+                      checked={answers[q.id] === opt.id}
+                      onChange={() => handleOptionChange(q.id, opt.id)}
                     />
-                    <span className="ml-2">{opt}</span>
+                    <span className="ml-2">{opt.optionText}</span>
                   </label>
                 ))}
               </div>

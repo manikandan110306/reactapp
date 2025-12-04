@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const QuestionForm = ({ quizzes }) => {
-  const [quizId, setQuizId] = useState("");
+const QuestionForm = ({ quizzes = [], quizId: propQuizId = null }) => {
+  const [quizId, setQuizId] = useState(propQuizId || "");
   const [questionText, setQuestionText] = useState("");
   const [questionType, setQuestionType] = useState("MULTIPLE_CHOICE");
   const [options, setOptions] = useState([
@@ -45,11 +45,12 @@ const QuestionForm = ({ quizzes }) => {
     setMessage({ text: "", type: "" });
 
     try {
-      const payload = { questionText, questionType, options };
-      await axios.post(
-        `http://localhost:8080/api/quizzes/${quizId}/questions`,
-        payload
-      );
+      const payload = {
+        questionText,
+        questionType,
+        options: options.map((opt) => ({ optionText: opt.optionText, isCorrect: opt.correct })),
+      };
+      await axios.post(`http://localhost:8080/api/quizzes/${quizId}/questions`, payload);
       setMessage({ text: "Question added successfully!", type: "success" });
       setQuestionText("");
       setOptions([
@@ -67,53 +68,57 @@ const QuestionForm = ({ quizzes }) => {
   };
 
   return (
-    <div className="max-w-lg mx-auto mt-6 p-4 border rounded shadow bg-white">
-      <h2 className="text-xl font-bold mb-4 text-center text-blue-600">Add Question</h2>
-      
+    <div className="card question-form">
+      <h2>Add Question</h2>
+
       {message.text && (
-        <div className={`mb-4 p-3 rounded ${message.type === "error" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>
+        <div className={`message ${message.type === "error" ? "error" : "success"}`}>
           {message.text}
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit}>
         {/* Quiz Select Dropdown */}
-        <div className="mb-4">
+        <div className="form-row">
           <label className="block font-medium text-gray-700 mb-1">Select Quiz</label>
-          <select
-            value={quizId}
-            onChange={(e) => setQuizId(e.target.value)}
-            className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          >
-            <option value="">-- Select a Quiz --</option>
-            {quizzes.map((quiz) => (
-              <option key={quiz.id} value={quiz.id}>
-                {quiz.title}
-              </option>
-            ))}
-          </select>
+          {propQuizId ? (
+            <div className="form-input">Selected Quiz ID: {propQuizId}</div>
+          ) : (
+            <select
+              value={quizId}
+              onChange={(e) => setQuizId(e.target.value)}
+              className="form-input"
+              required
+            >
+              <option value="">-- Select a Quiz --</option>
+              {Array.isArray(quizzes) && quizzes.map((quiz) => (
+                <option key={quiz.id} value={quiz.id}>
+                  {quiz.title}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
         {/* Question Text */}
-        <div className="mb-4">
+        <div className="form-row">
           <label className="block font-medium text-gray-700 mb-1">Question Text</label>
           <input
             type="text"
             value={questionText}
             onChange={(e) => setQuestionText(e.target.value)}
-            className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="form-input"
             required
           />
         </div>
 
         {/* Question Type */}
-        <div className="mb-4">
+        <div className="form-row">
           <label className="block font-medium text-gray-700 mb-1">Question Type</label>
           <select
             value={questionType}
             onChange={(e) => setQuestionType(e.target.value)}
-            className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="form-input"
           >
             <option value="MULTIPLE_CHOICE">Multiple Choice</option>
             <option value="TRUE_FALSE">True/False</option>
@@ -121,43 +126,43 @@ const QuestionForm = ({ quizzes }) => {
         </div>
 
         {/* Options */}
-        <div className="mb-6">
+        <div className="form-row">
           <label className="block font-medium text-gray-700 mb-2">Options</label>
-          {options.map((option, index) => (
-            <div key={index} className="flex items-center mb-3 gap-2">
-              <input
-                type="text"
-                value={option.optionText}
-                onChange={(e) =>
-                  handleOptionChange(index, "optionText", e.target.value)
-                }
-                placeholder={`Option ${index + 1}`}
-                className="flex-1 border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-              <div className="flex items-center">
+          <div className="options-list">
+            {options.map((option, index) => (
+              <div key={index} className="option-row">
                 <input
-                  type={questionType === "MULTIPLE_CHOICE" ? "radio" : "checkbox"}
-                  name="correctOption"
-                  checked={option.correct}
-                  onChange={() => handleCorrectChange(index)}
-                  className="mr-1 h-4 w-4 text-blue-600 focus:ring-blue-500"
+                  type="text"
+                  value={option.optionText}
+                  onChange={(e) => handleOptionChange(index, "optionText", e.target.value)}
+                  placeholder={`Option ${index + 1}`}
+                  className="option-text"
+                  required
                 />
-                <label className="text-sm text-gray-700">Correct</label>
+                <div className="correct-toggle">
+                  <input
+                    type={questionType === "MULTIPLE_CHOICE" ? "radio" : "checkbox"}
+                    name={`correct-${questionType === "MULTIPLE_CHOICE" ? "single" : index}`}
+                    checked={option.correct}
+                    onChange={() => handleCorrectChange(index)}
+                  />
+                  <label style={{ fontSize: '0.9rem' }}>Correct</label>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className={`w-full py-2 px-4 rounded font-medium text-white ${
-            isSubmitting ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-          } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
-        >
-          {isSubmitting ? "Adding Question..." : "Add Question"}
-        </button>
+        <div className="btn-row">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className={`btn btn-primary`}
+            style={isSubmitting ? { opacity: 0.7, cursor: 'not-allowed' } : {}}
+          >
+            {isSubmitting ? "Adding Question..." : "Add Question"}
+          </button>
+        </div>
       </form>
     </div>
   );
