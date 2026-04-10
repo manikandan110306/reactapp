@@ -6,50 +6,27 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const user = getCurrentUser();
-  
-  const navStyle = {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: '1.5rem',
-    background: 'linear-gradient(90deg, #6dd5ed 0%, #2193b0 100%)',
-    padding: '1rem 0',
-    borderTopLeftRadius: '20px',
-    borderTopRightRadius: '20px',
-    color: '#fff',
-    fontWeight: 500,
-    fontSize: '1.1rem',
-    marginBottom: '1.5rem',
-  };
-
-  const linkStyle = {
-    color: '#fff',
-    textDecoration: 'none',
-    padding: '0.5rem 1.2rem',
-    borderRadius: '8px',
-    transition: 'background 0.2s',
-  };
-
-  const activeLinkStyle = {
-    ...linkStyle,
-    background: '#2193b0'
-  };
 
   const handleLogout = () => {
     localStorage.removeItem('user');
     navigate('/');
   };
 
+  const getLinkClass = (path) => {
+    return location.pathname === path ? 'active-link' : '';
+  };
+
   return (
-    <nav className="navbar-top" style={navStyle}>
+    <nav className="navbar-top">
       {user && (
         <>
-          <Link to="/home" style={location.pathname === '/home' ? activeLinkStyle : linkStyle}>Home</Link>
-          <Link to="/create-quiz" style={location.pathname === '/create-quiz' ? activeLinkStyle : linkStyle}>Create Quiz</Link>
-          <Link to="/add-question" style={location.pathname === '/add-question' ? activeLinkStyle : linkStyle}>Add Question</Link>
-          <Link to="/take-quiz" style={location.pathname === '/take-quiz' ? activeLinkStyle : linkStyle}>Take Quiz</Link>
-          <Link to="/quizzes" style={location.pathname === '/quizzes' ? activeLinkStyle : linkStyle}>All Quizzes</Link>
-          <button onClick={handleLogout} style={{ ...linkStyle, background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer' }}>Logout</button>
+          <Link to="/home" className={getLinkClass('/home')}>Home</Link>
+          <Link to="/create-quiz" className={getLinkClass('/create-quiz')}>Create Quiz</Link>
+          <Link to="/add-question" className={getLinkClass('/add-question')}>Add Question</Link>
+          <Link to="/quizzes" className={getLinkClass('/quizzes')}>All Quizzes</Link>
+          <button onClick={handleLogout} className="btn" style={{ padding: '0.4rem 1rem', fontSize: '1rem', marginLeft: 'auto' }}>
+            Logout
+          </button>
         </>
       )}
     </nav>

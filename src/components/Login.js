@@ -6,140 +6,97 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
-
+    setLoading(true);
     try {
-      const response = await axios.post("http://localhost:8080/api/auth/login", {
-        email,
-        password,
-      });
-
+      const response = await axios.post("http://localhost:8080/api/auth/login", { email, password });
       if (response.status === 200) {
         localStorage.setItem("user", JSON.stringify(response.data));
-        navigate("/home"); // ✅ Redirect after login
+        const role = response.data.role;
+        if (role === "ADMIN") navigate("/admin");
+        else if (role === "TEACHER") navigate("/teacher");
+        else navigate("/student");
       }
     } catch (err) {
-      console.error(err);
-      setError("Invalid credentials or server error.");
+      setError("Invalid email or password. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "2rem",
-      }}
-    >
-      <h2
-        style={{
-          fontSize: "1.8rem",
-          fontWeight: "bold",
-          marginBottom: "1.5rem",
-          color: "#333",
-        }}
-      >
-        Login
-      </h2>
+    <div className="auth-wrapper">
+      <div className="auth-left">
+        <div className="auth-left-content">
+          <div className="auth-logo">🎯</div>
+          <h1>QuizMaster Pro</h1>
+          <p>The modern quiz platform for educators and learners. Create, assign, and track quizzes with ease.</p>
+          <div className="auth-features">
+            <div className="auth-feature-item">
+              <div className="auth-feature-icon">📋</div>
+              <span>Create unlimited quizzes with rich question types</span>
+            </div>
+            <div className="auth-feature-item">
+              <div className="auth-feature-icon">🎓</div>
+              <span>Assign quizzes to individual students</span>
+            </div>
+            <div className="auth-feature-item">
+              <div className="auth-feature-icon">📊</div>
+              <span>Track results and view leaderboards in real-time</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="auth-right">
+        <div className="auth-form-container animate-pop">
+          <h2 className="auth-form-title">Welcome back</h2>
+          <p className="auth-form-subtitle">Sign in to your QuizMaster account</p>
 
-      {error && (
-        <p style={{ color: "red", marginBottom: "1rem", fontWeight: "500" }}>
-          {error}
-        </p>
-      )}
+          {error && <div className="alert alert-error">{error}</div>}
 
-      <form
-        onSubmit={handleLogin}
-        style={{
-          width: "100%",
-          maxWidth: "350px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "1rem",
-        }}
-      >
-        <input
-          type="email"
-          placeholder="Enter Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          style={{
-            padding: "0.8rem",
-            borderRadius: "8px",
-            border: "1px solid #ccc",
-            fontSize: "1rem",
-            outline: "none",
-          }}
-          onFocus={(e) => (e.target.style.borderColor = "#4a90e2")}
-          onBlur={(e) => (e.target.style.borderColor = "#ccc")}
-        />
+          <form onSubmit={handleLogin}>
+            <div className="form-group">
+              <label className="form-label">Email Address</label>
+              <input
+                type="email"
+                className="form-input"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Password</label>
+              <input
+                type="password"
+                className="form-input"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <button type="submit" className="btn btn-primary btn-full btn-lg" style={{ marginTop: "0.5rem" }} disabled={loading}>
+              {loading ? "Signing in..." : "Sign In →"}
+            </button>
+          </form>
 
-        <input
-          type="password"
-          placeholder="Enter Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={{
-            padding: "0.8rem",
-            borderRadius: "8px",
-            border: "1px solid #ccc",
-            fontSize: "1rem",
-            outline: "none",
-          }}
-          onFocus={(e) => (e.target.style.borderColor = "#4a90e2")}
-          onBlur={(e) => (e.target.style.borderColor = "#ccc")}
-        />
+          <div className="auth-divider">or</div>
 
-        <button
-          type="submit"
-          style={{
-            background: "#4a90e2",
-            color: "white",
-            fontSize: "1rem",
-            fontWeight: "600",
-            padding: "0.8rem",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            transition: "background 0.3s",
-          }}
-          onMouseOver={(e) => (e.target.style.background = "#357ab7")}
-          onMouseOut={(e) => (e.target.style.background = "#4a90e2")}
-        >
-          Login
-        </button>
-      </form>
-
-      <p
-        style={{
-          marginTop: "1rem",
-          fontSize: "0.9rem",
-          color: "#555",
-        }}
-      >
-        Don’t have an account?{" "}
-        <Link
-          to="/signup"
-          style={{
-            color: "#4a90e2",
-            fontWeight: "600",
-            textDecoration: "none",
-          }}
-          onMouseOver={(e) => (e.target.style.textDecoration = "underline")}
-          onMouseOut={(e) => (e.target.style.textDecoration = "none")}
-        >
-          Sign Up
-        </Link>
-      </p>
+          <p style={{ textAlign: "center", fontSize: "0.9rem", color: "var(--gray-500)" }}>
+            Don't have an account?{" "}
+            <Link to="/signup" style={{ color: "var(--brand-primary)", fontWeight: 600, textDecoration: "none" }}>
+              Create account
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

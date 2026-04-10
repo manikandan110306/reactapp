@@ -1,78 +1,130 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-const QuizForm = () => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [timeLimit, setTimeLimit] = useState(10);
-  const [message, setMessage] = useState('');
+const QuizForm = ({ onQuizCreated }) => {
+  const navigate = useNavigate();
+  const [quizzes, setQuizzes] = useState([
+    { title: '', description: '', timeLimit: 10 }
+  ]);
+  const [message, setMessage] = useState({ text: '', type: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleInputChange = (index, field, value) => {
+    const updatedQuizzes = [...quizzes];
+    updatedQuizzes[index][field] = value;
+    setQuizzes(updatedQuizzes);
+  };
+
+  const addQuizForm = () => {
+    setQuizzes([...quizzes, { title: '', description: '', timeLimit: 10 }]);
+  };
+
+  const removeQuizForm = (index) => {
+    if (quizzes.length === 1) return;
+    const updatedQuizzes = quizzes.filter((_, i) => i !== index);
+    setQuizzes(updatedQuizzes);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
-      await axios.post('http://localhost:8080/api/quizzes', {
-        title,
-        description,
-        timeLimit
-      });
-      setMessage('Quiz created successfully!');
-      setTitle('');
-      setDescription('');
-      setTimeLimit(10);
+      if (quizzes.length === 1) {
+        // Fallback or just regular endpoint for 1
+        await axios.post('http://localhost:8080/api/quizzes', quizzes[0]);
+      } else {
+        // Use the new bulk endpoint
+        await axios.post('http://localhost:8080/api/quizzes/bulk', quizzes);
+      }
+      setMessage({ text: 'Quiz created successfully!', type: 'success' });
+      setQuizzes([{ title: '', description: '', timeLimit: 10 }]);
+      if (onQuizCreated) onQuizCreated();
+      setTimeout(() => navigate("/quizzes"), 1500);
     } catch (error) {
-      setMessage('Failed to create quiz. Please try again.');
+      setMessage({ text: 'Failed to create quiz. Please try again.', type: 'error' });
       console.error(error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div style={{ padding: '1.5rem' }}>
-      <h3 style={{ color: '#2193b0', marginBottom: '1.5rem', textAlign: 'center' }}>Create New Quiz</h3>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Quiz Title</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            style={{ width: '100%', padding: '0.75rem', border: '1px solid #ddd', borderRadius: '4px' }}
-          />
+    <div className="card" style={{ maxWidth: '800px', margin: '0 auto' }}>
+      <h2 style={{ textAlign: 'center' }}>Create New Quiz</h2>
+      
+      {message.text && (
+        <div className={`message ${message.type === "error" ? "error" : "success"}`}>
+          {message.text}
         </div>
-        <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Description</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            style={{ width: '100%', padding: '0.75rem', border: '1px solid #ddd', borderRadius: '4px', minHeight: '80px' }}
-          />
+      )}
+
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        {quizzes.map((quiz, index) => (
+          <div key={index} className="bulk-quiz-box" style={{ padding: '1rem', border: '3px solid #000', borderRadius: '12px', background: '#fff', position: 'relative' }}>
+            {quizzes.length > 1 && (
+              <button 
+                type="button" 
+                onClick={() => removeQuizForm(index)}
+                style={{ position: 'absolute', top: '10px', right: '10px', background: '#ff4d4d', color: '#fff', border: '2px solid #000', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                X
+              </button>
+            )}
+            <h4 style={{ margin: '0 0 1rem 0' }}>Quiz #{index + 1}</h4>
+            <div className="form-row">
+              <label>Quiz Title</label>
+              <input
+                type="text"
+                placeholder="Enter a catchy title!"
+                value={quiz.title}
+                onChange={(e) => handleInputChange(index, 'title', e.target.value)}
+                className="form-input"
+                required
+              />
+            </div>
+            <div className="form-row">
+              <label>Description</label>
+              <textarea
+                placeholder="What is this quiz about?"
+                value={quiz.description}
+                onChange={(e) => handleInputChange(index, 'description', e.target.value)}
+                className="form-input"
+                style={{ minHeight: '80px' }}
+              />
+            </div>
+            <div className="form-row">
+              <label>Time Limit (minutes)</label>
+              <input
+                type="number"
+                value={quiz.timeLimit}
+                onChange={(e) => handleInputChange(index, 'timeLimit', e.target.value)}
+                min="1"
+                className="form-input"
+                required
+              />
+            </div>
+          </div>
+        ))}
+
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+          <button 
+            type="button" 
+            className="btn" 
+            style={{ background: '#ffd900', color: '#000' }} 
+            onClick={addQuizForm}
+          >
+            + Add Another Quiz
+          </button>
+          <button 
+            type="submit" 
+            className="btn btn-primary"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Creating...' : 'Create Quiz'}
+          </button>
         </div>
-        <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Time Limit (minutes)</label>
-          <input
-            type="number"
-            value={timeLimit}
-            onChange={(e) => setTimeLimit(e.target.value)}
-            min="1"
-            style={{ width: '100%', padding: '0.75rem', border: '1px solid #ddd', borderRadius: '4px' }}
-          />
-        </div>
-        <button 
-          type="submit" 
-          style={{ 
-            background: '#2193b0', 
-            color: 'white', 
-            border: 'none', 
-            padding: '0.75rem', 
-            borderRadius: '4px', 
-            cursor: 'pointer',
-            fontWeight: '600'
-          }}
-        >
-          Create Quiz
-        </button>
       </form>
-      {message && <p style={{ marginTop: '1rem', color: message.includes('success') ? 'green' : 'red' }}>{message}</p>}
     </div>
   );
 };

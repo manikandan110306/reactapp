@@ -80,9 +80,10 @@ const QuizList = ({ onSelectQuiz }) => {
 
       <div className="quiz-grid">
         {quizzes.map((quiz) => (
-          <div key={quiz.id} className="quiz-item" data-testid={`quiz-${quiz.id}`}>
-            <div className="quiz-item-title">{quiz.title}</div>
-            <div className="quiz-item-desc">{quiz.description}</div>
+          <div key={quiz.id} className="quiz-card" data-testid={`quiz-${quiz.id}`}>
+            <div className="quiz-icon">🎯</div>
+            <div className="quiz-title">{quiz.title}</div>
+            <div className="quiz-desc">{quiz.description}</div>
             <div className="quiz-separator" />
             <div className="quiz-item-meta">
               <div>Time Limit: {quiz.timeLimit} mins</div>

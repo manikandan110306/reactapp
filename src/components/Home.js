@@ -1,16 +1,16 @@
 import React from 'react';
 
 const Home = () => {
-  const user = JSON.parse(localStorage.getItem("user"));
-  console.log(user.name);
+  const user = JSON.parse(localStorage.getItem("user")) || { name: "Guest" };
   return (
-    <div style={{ textAlign: 'center', padding: '2rem' }}>
-      <h2 style={{ color: '#2193b0', marginBottom: '1rem' }}>Welcome to QuizMaster</h2>
-      <h3>Welcome, {user.name}</h3>
-      <p style={{ color: '#555', lineHeight: '1.6' }}>
-        
-        Create and manage quizzes, add questions, and track results with our easy-to-use quiz management system.
-      </p>
+    <div className="gradient-bg">
+      <div className="card" style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center', background: 'var(--secondary-color)', border: 'var(--border-thick)' }}>
+        <h1 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '1rem', color: '#111' }}>Welcome to QuizMaster!</h1>
+        <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '1rem', color: 'var(--primary-color)' }}>Hey there, {user.name} 👋</h2>
+        <p style={{ fontSize: '1.2rem', fontWeight: 600, color: '#111', lineHeight: '1.6' }}>
+          Create and manage quizzes, add questions, and track results with our totally revamped, ultra-fun platform.
+        </p>
+      </div>
     </div>
   );
 };
