@@ -62,13 +62,20 @@ export default function TeacherDashboard() {
     <div className="app-shell">
       {/* Navbar */}
       <nav className="navbar-top">
-        <span className="navbar-brand">🎯 QuizMaster Pro</span>
+        <span className="navbar-brand" style={{ cursor: "pointer" }} onClick={() => navigate("/teacher")}>🎯 QuizMaster Pro</span>
         <span className="navbar-spacer" />
         <div className="navbar-user-chip">
           <div className="navbar-avatar" style={{ background: "#4338CA" }}>{initials(user.name)}</div>
           <span>{user.name}</span>
           <span className="badge-role" style={{ background: "#EEF2FF", color: "#3730A3" }}>Teacher</span>
         </div>
+        <button
+          className="btn-nav-logout"
+          style={{ marginRight: "0.5rem" }}
+          onClick={() => navigate("/profile")}
+        >
+          👤 Profile
+        </button>
         <button className="btn-nav-logout" onClick={() => { localStorage.removeItem("user"); navigate("/"); }}>
           Logout
         </button>

@@ -85,19 +85,34 @@ export default function AdminDashboard() {
     } catch { setRoleMsg("❌ Failed to update role."); }
   };
 
+  const handleDeleteUser = async (id, name) => {
+    if (!window.confirm(`Are you sure you want to permanently delete "${name}"?`)) return;
+    try {
+      await axios.delete(`http://localhost:8080/api/auth/users/${id}`);
+      setAllUsers((prev) => prev.filter((u) => u.id !== id));
+    } catch { alert("Failed to delete user."); }
+  };
+
   const initials = (name) => name ? name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) : "A";
 
   return (
     <div className="app-shell">
       {/* Navbar */}
       <nav className="navbar-top">
-        <span className="navbar-brand">🎯 QuizMaster Pro</span>
+        <span className="navbar-brand" style={{ cursor: "pointer" }} onClick={() => navigate("/admin")}>🎯 QuizMaster Pro</span>
         <span className="navbar-spacer" />
         <div className="navbar-user-chip">
           <div className="navbar-avatar">{initials(user.name)}</div>
           <span>{user.name}</span>
           <span className="badge-role badge-admin">Admin</span>
         </div>
+        <button
+          className="btn-nav-logout"
+          style={{ marginRight: "0.5rem" }}
+          onClick={() => navigate("/profile")}
+        >
+          👤 Profile
+        </button>
         <button className="btn-nav-logout" onClick={() => { localStorage.removeItem("user"); navigate("/"); }}>
           Logout
         </button>
@@ -236,9 +251,17 @@ export default function AdminDashboard() {
                             </span>
                           </td>
                           <td>
-                            <button className="btn btn-outline btn-sm" onClick={() => openRoleModal(u)}>
-                              ✏️ Change Role
-                            </button>
+                            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                              <button className="btn btn-outline btn-sm" onClick={() => openRoleModal(u)}>
+                                ✏️ Change Role
+                              </button>
+                              <button
+                                className="btn btn-danger btn-sm"
+                                onClick={() => handleDeleteUser(u.id, u.name)}
+                              >
+                                🗑️ Delete
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );

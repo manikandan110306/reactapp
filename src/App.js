@@ -9,6 +9,7 @@ import QuizBuilder from './components/QuizBuilder';
 import QuizResults from './components/QuizResults';
 import AttendQuiz from './components/AttendQuiz';
 import PrivateRoute from './components/PrivateRoute';
+import ProfilePage from './components/ProfilePage';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/quiz/:quizId" element={<PrivateRoute><AttendQuiz /></PrivateRoute>} />
         <Route path="/take-quiz/:quizId" element={<PrivateRoute><AttendQuiz /></PrivateRoute>} />
         <Route path="/results/:quizId" element={<PrivateRoute><QuizResults /></PrivateRoute>} />
+        <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
 
         {/* Legacy/generic redirects */}
         <Route path="/home" element={<PrivateRoute><RoleRedirect /></PrivateRoute>} />

@@ -27,13 +27,20 @@ export default function StudentDashboard() {
     <div className="app-shell">
       {/* Navbar */}
       <nav className="navbar-top">
-        <span className="navbar-brand">🎯 QuizMaster Pro</span>
+        <span className="navbar-brand" onClick={() => navigate("/student")}>🎯 QuizMaster Pro</span>
         <span className="navbar-spacer" />
         <div className="navbar-user-chip">
           <div className="navbar-avatar">{initials(user.name)}</div>
           <span>{user.name}</span>
           <span className="badge-role badge-student">Student</span>
         </div>
+        <button
+          className="btn-nav-logout"
+          style={{ marginRight: "0.5rem" }}
+          onClick={() => navigate("/profile")}
+        >
+          👤 Profile
+        </button>
         <button className="btn-nav-logout" onClick={() => { localStorage.removeItem("user"); navigate("/"); }}>
           Logout
         </button>
